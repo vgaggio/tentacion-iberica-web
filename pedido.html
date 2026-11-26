@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hacer pedido · Tentación Ibérica</title>
+<meta name="description" content="Armá tu pedido de Tentación Ibérica y envialo por WhatsApp.">
+<meta name="theme-color" content="#bdb69d">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/logo-cuadrado.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Great+Vibes&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a href="./" aria-label="Volver al inicio"><img class="logo" src="img/logo.png" alt="Tentación Ibérica" width="620" height="470"></a>
+    <a class="back" href="./">← Ver carta</a>
+  </div>
+</header>
+
+<div class="wrap order-intro">
+  <h1>Tu pedido</h1>
+  <p>Elegí los productos y cantidades. Al final te armamos el mensaje para enviarlo por WhatsApp.</p>
+</div>
+
+<nav class="bar" aria-label="Categorías">
+  <div class="wrap">
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Buscar producto…" aria-label="Buscar producto">
+    </label>
+    <div class="cats" id="cats"></div>
+  </div>
+</nav>
+
+<main class="wrap order-main">
+  <div id="menu"></div>
+  <div class="empty" id="empty">No encontramos nada con esa búsqueda.</div>
+</main>
+
+<div class="cartbar" id="cartbar">
+  <button type="button" id="openCart"><span>Ver pedido <span id="count">(0)</span></span><b id="totalBar">$0</b></button>
+</div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="bd" data-close></div>
+  <div class="panel">
+    <h2 id="sheetTitle">Tu pedido <button type="button" data-close aria-label="Cerrar">×</button></h2>
+    <ul class="sum" id="sum"></ul>
+    <div class="total"><span>Total</span><span id="total">$0</span></div>
+    <form class="form" id="form" novalidate>
+      <label>Nombre
+        <input name="nombre" id="nombre" autocomplete="name" required placeholder="¿A nombre de quién?">
+      </label>
+      <div>
+        <label style="margin-bottom:5px">Entrega</label>
+        <div class="seg">
+          <label><input type="radio" name="entrega" value="retiro" checked><span>Retiro en el local</span></label>
+          <label><input type="radio" name="entrega" value="envio"><span>Envío a domicilio</span></label>
+        </div>
+      </div>
+      <label id="dirWrap" hidden>Dirección de envío
+        <input name="direccion" id="direccion" autocomplete="street-address" placeholder="Calle, número, depto, barrio">
+      </label>
+      <div>
+        <label style="margin-bottom:5px">Pago</label>
+        <div class="seg">
+          <label><input type="radio" name="pago" value="Efectivo" checked><span>Efectivo</span></label>
+          <label><input type="radio" name="pago" value="Transferencia"><span>Transferencia</span></label>
+        </div>
+      </div>
+      <label>¿Para cuándo? <span style="opacity:.7">(opcional)</span>
+        <input name="cuando" id="cuando" placeholder="Ej: hoy 20:30, sábado al mediodía">
+      </label>
+      <label>Aclaraciones <span style="opacity:.7">(opcional)</span>
+        <textarea name="notas" id="notas" rows="2" placeholder="Ej: sin tomate, cortar al medio"></textarea>
+      </label>
+      <p class="err" id="err"></p>
+      <button class="send" type="submit">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.5-.3z"/></svg>
+        Enviar pedido por WhatsApp
+      </button>
+      <p class="hint">Se abre WhatsApp con el pedido listo para enviar. El local te confirma disponibilidad<span id="hintEnvio" hidden> y el costo de envío</span>.</p>
+    </form>
+  </div>
+</div>
+
+<script src="menu.js"></script>
+<script>
+const WA = "5493518047675";
+const CATS = [
+  ["desayunos","Desayunos"],["cafe","Cafetería"],["dulces","Pastelería"],["tablas","Tablas"],
+  ["sandwiches","Sandwiches"],["wraps","Wraps"],["platos","Platos"],["licuados","Licuados"],
+  ["bebidas","Bebidas"],["tragos","Tragos"]
+];
+const fmt = n => "$" + n.toLocaleString("es-AR");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+
+// Cada tamaño de tabla es una línea propia; desayunos y licuados llevan opción a elegir.
+const LINES = [];
+window.MENU.forEach(it => {
+  let opts = null;
+  if (it.opt && it.opt.startsWith("Infusión a elección: ")) opts = it.opt.replace("Infusión a elección: ","").split(", ");
+  else if (it.opt && it.opt.startsWith("Con ")) opts = it.opt.replace("Con ","").split(" o ");
+  if (it.sizes) it.sizes.forEach(([p,v]) => LINES.push({id:`${it.n} p/${p}`, c:it.c, n:`${it.n} · para ${p}`, p:v, img:it.img}));
+  else LINES.push({id:it.n, c:it.c, n:it.n, p:it.p, img:it.img, opts});
+});
+const byId = Object.fromEntries(LINES.map(l => [l.id, l]));
+
+// carrito: clave "id||opción" -> cantidad (se recuerda en este navegador si se puede)
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+let cart = store.get("ti-cart", {});
+for (const k of Object.keys(cart)) if (!byId[k.split("||")[0]] || !(cart[k] > 0)) delete cart[k];
+const keyOf = (id, opt) => id + "||" + (opt || "");
+const selOpt = {}; // opción elegida por línea
+
+const lineHTML = l => {
+  const th = l.img ? `<img class="th" src="${l.img}" alt="" loading="lazy" width="56" height="56">` : `<div class="th noimg" aria-hidden="true">T</div>`;
+  const sel = l.opts ? `<select data-opt="${esc(l.id)}" aria-label="Opción para ${esc(l.n)}">${l.opts.map(o => `<option>${esc(o)}</option>`).join("")}</select>` : "";
+  return `<div class="line" data-id="${esc(l.id)}" data-k="${esc(norm(l.n))}">${th}
+    <div class="mid"><div class="nm">${esc(l.n)}</div><div class="pr">${l.p ? fmt(l.p) : "Precio a consultar"}</div>${sel}</div>
+    <div class="step"><button type="button" data-dec aria-label="Quitar uno">−</button><output>0</output><button type="button" class="add" data-inc aria-label="Agregar uno">+</button></div>
+  </div>`;
+};
+document.getElementById("menu").innerHTML = CATS.map(([id,t]) => {
+  const ls = LINES.filter(l => l.c === id);
+  return ls.length ? `<section id="${id}" class="cat"><h2>${t}</h2><div class="list">${ls.map(lineHTML).join("")}</div></section>` : "";
+}).join("");
+document.getElementById("cats").innerHTML = CATS.map(([id,t]) => `<a href="#${id}" data-id="${id}">${t}</a>`).join("");
+LINES.forEach(l => { if (l.opts) selOpt[l.id] = l.opts[0]; });
+
+const entries = () => Object.entries(cart).filter(([,q]) => q > 0).map(([k,q]) => { const [id,opt] = k.split("||"); return {k, l:byId[id], opt, q}; });
+const totals = () => entries().reduce((a,e) => ({n:a.n+e.q, t:a.t+(e.l.p||0)*e.q, cons:a.cons||!e.l.p}), {n:0,t:0,cons:false});
+
+function render(){
+  document.querySelectorAll(".line").forEach(el => {
+    const id = el.dataset.id, q = cart[keyOf(id, selOpt[id])] || 0;
+    const any = Object.keys(cart).some(k => k.startsWith(id + "||") && cart[k] > 0);
+    el.querySelector("output").textContent = q;
+    el.querySelector("[data-dec]").disabled = !q;
+    el.classList.toggle("has", any);
+  });
+  const {n,t,cons} = totals();
+  document.getElementById("count").textContent = `(${n})`;
+  document.getElementById("totalBar").textContent = fmt(t) + (cons ? " +" : "");
+  document.getElementById("cartbar").classList.toggle("show", n > 0);
+  document.getElementById("total").textContent = fmt(t) + (cons ? " + a consultar" : "");
+  document.getElementById("sum").innerHTML = entries().map(e => `<li><span class="q">${e.q}×</span>
+    <span class="n">${esc(e.l.n)}${e.opt ? `<small>${esc(e.opt)}</small>` : ""}</span>
+    <span class="v">${e.l.p ? fmt(e.l.p*e.q) : "a consultar"}</span>
+    <span class="step"><button type="button" data-sdec="${esc(e.k)}" aria-label="Quitar uno">−</button><button type="button" data-sinc="${esc(e.k)}" aria-label="Agregar uno">+</button></span></li>`).join("");
+  store.set("ti-cart", cart);
+  if (!n) closeSheet();
+}
+const bump = (k, d) => { cart[k] = Math.max(0, (cart[k] || 0) + d); if (!cart[k]) delete cart[k]; render(); };
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const line = b.closest(".line");
+  if (line && (b.hasAttribute("data-inc") || b.hasAttribute("data-dec"))) {
+    const id = line.dataset.id; bump(keyOf(id, selOpt[id]), b.hasAttribute("data-inc") ? 1 : -1);
+  }
+  if (b.dataset.sinc) bump(b.dataset.sinc, 1);
+  if (b.dataset.sdec) bump(b.dataset.sdec, -1);
+});
+document.addEventListener("change", e => { if (e.target.dataset.opt) { selOpt[e.target.dataset.opt] = e.target.value; render(); } });
+
+// hoja del pedido
+const sheet = document.getElementById("sheet");
+function closeSheet(){ sheet.classList.remove("on"); document.body.style.overflow = ""; }
+document.getElementById("openCart").onclick = () => { sheet.classList.add("on"); document.body.style.overflow = "hidden"; };
+sheet.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeSheet(); });
+document.addEventListener("keydown", e => e.key === "Escape" && closeSheet());
+
+// formulario
+const form = document.getElementById("form"), dirWrap = document.getElementById("dirWrap"), err = document.getElementById("err");
+const saved = store.get("ti-datos", {});
+["nombre","direccion"].forEach(f => { if (saved[f]) form[f].value = saved[f]; });
+const syncEntrega = () => { const env = form.entrega.value === "envio"; dirWrap.hidden = !env; document.getElementById("hintEnvio").hidden = !env; };
+form.addEventListener("change", syncEntrega); syncEntrega();
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const nombre = form.nombre.value.trim(), env = form.entrega.value === "envio", dir = form.direccion.value.trim();
+  const fail = (m, el) => { err.textContent = m; err.style.display = "block"; el.focus(); };
+  if (!nombre) return fail("Poné tu nombre para el pedido.", form.nombre);
+  if (env && !dir) return fail("Poné la dirección de envío.", form.direccion);
+  err.style.display = "none";
+  store.set("ti-datos", {nombre, direccion: dir});
+  const {t, cons} = totals();
+  const items = entries().map(e => `• ${e.q} × ${e.l.n}${e.opt ? ` (${e.opt})` : ""} — ${e.l.p ? fmt(e.l.p*e.q) : "a consultar"}`);
+  const msg = [
+    "¡Hola Tentación Ibérica! Quiero hacer este pedido:", "",
+    ...items, "",
+    `*Total: ${fmt(t)}*${cons ? " (+ productos a consultar)" : ""}`, "",
+    `Nombre: ${nombre}`,
+    `Entrega: ${env ? "Envío a domicilio — " + dir : "Retiro en el local"}`,
+    `Pago: ${form.pago.value}`,
+    form.cuando.value.trim() ? `Para: ${form.cuando.value.trim()}` : null,
+    form.notas.value.trim() ? `Aclaraciones: ${form.notas.value.trim()}` : null
+  ].filter(l => l !== null).join("\n");
+  location.href = `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+});
+
+// búsqueda y categorías (igual que la carta)
+document.getElementById("q").addEventListener("input", e => {
+  const q = norm(e.target.value.trim()); let any = false;
+  document.querySelectorAll("section.cat").forEach(sec => {
+    let vis = 0;
+    sec.querySelectorAll(".line").forEach(el => { const ok = !q || el.dataset.k.includes(q); el.style.display = ok ? "" : "none"; vis += ok; });
+    sec.style.display = vis ? "" : "none"; any ||= vis > 0;
+  });
+  document.getElementById("empty").style.display = any ? "none" : "block";
+});
+const links = [...document.querySelectorAll(".cats a")], catsBar = document.getElementById("cats");
+const centerChip = a => catsBar.scrollTo({left: a.offsetLeft - (catsBar.clientWidth - a.offsetWidth) / 2, behavior: "smooth"});
+const obs = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  links.forEach(a => { const on = a.dataset.id === e.target.id; a.classList.toggle("on", on); if (on) centerChip(a); });
+}), {rootMargin:"-130px 0px -65% 0px"});
+document.querySelectorAll("section.cat").forEach(s => obs.observe(s));
+render();
+</script>
+</body>
+</html>
