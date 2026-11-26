@@ -221,11 +221,21 @@ document.getElementById("q").addEventListener("input", e => {
 });
 const links = [...document.querySelectorAll(".cats a")], catsBar = document.getElementById("cats");
 const centerChip = a => catsBar.scrollTo({left: a.offsetLeft - (catsBar.clientWidth - a.offsetWidth) / 2, behavior: "smooth"});
-const obs = new IntersectionObserver(es => es.forEach(e => {
-  if (!e.isIntersecting) return;
-  links.forEach(a => { const on = a.dataset.id === e.target.id; a.classList.toggle("on", on); if (on) centerChip(a); });
-}), {rootMargin:"-130px 0px -65% 0px"});
-document.querySelectorAll("section.cat").forEach(s => obs.observe(s));
+const SECS = "section.cat";
+// categoría activa = última sección cuyo título ya pasó debajo de la barra fija
+let activeId = null;
+const secs = () => [...document.querySelectorAll(SECS)].filter(s => s.style.display !== "none");
+function markActive(){
+  const lim = document.querySelector(".bar").getBoundingClientRect().bottom + 24;
+  const list = secs(); let cur = list[0];
+  for (const s of list) if (s.getBoundingClientRect().top <= lim) cur = s;
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) cur = list[list.length - 1];
+  if (!cur || cur.id === activeId) return;
+  activeId = cur.id;
+  links.forEach(a => { const on = a.dataset.id === activeId; a.classList.toggle("on", on); if (on) centerChip(a); });
+}
+addEventListener("scroll", () => requestAnimationFrame(markActive), {passive:true});
+addEventListener("load", markActive); markActive();
 render();
 </script>
 </body>
